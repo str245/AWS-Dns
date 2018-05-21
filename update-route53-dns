@@ -1,0 +1,17 @@
+#!/bin/sh
+# Source: https://github.com/str245/AWS-Dns
+
+. /etc/route53/config
+export AWS_ACCESS_KEY_ID
+export AWS_SECRET_ACCESS_KEY
+
+##
+TTL="300"
+REGION=$(curl -s http://169.254.169.254/latest/dynamic/instance-identity/document | grep region | awk -F\" '{print $4}')
+INSTANCE_ID=$(ec2metadata | grep 'instance-id:' | cut -d ' ' -f 2)
+INTERNAL_HOSTNAME=$(aws ec2 describe-tags --filters "Name=resource-id,Values=$INSTANCE_ID" "Name=key,Values=internal-hostname" --region=$REGION --output=text | cut -f5)
+PUBLIC_HOSTNAME=$(aws ec2 describe-tags --filters "Name=resource-id,Values=$INSTANCE_ID" "Name=key,Values=public-hostname" --region=$REGION --output=text | cut -f5)
+LOCAL_IPV4=$(ec2metadata | grep 'local-ipv4:' | cut -d ' ' -f 2)
+PUBLIC_IPV4=$(ec2metadata | grep 'public-ipv4:' | cut -d ' ' -f 2)
+cli53 rrcreate --replace "$ZONE" "$INTERNAL_HOSTNAME $TTL A $LOCAL_IPV4"
+cli53 rrcreate --replace "$ZONE" "$PUBLIC_HOSTNAME $TTL A $PUBLIC_IPV4"
