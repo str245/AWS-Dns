@@ -1,0 +1,16 @@
+---
+- hosts: localhost
+  connection: local
+  gather_facts: True
+  roles:
+  - create-iam-group
+  - create-iam-user
+  - create-route53-domain
+  tasks:
+  - name: Borrando ficheros de trabajo
+    file:
+      path: "{{ item }}"
+      state: absent
+    with_items:
+      - config/iam_policy.json
+      - config/config

@@ -1,0 +1,13 @@
+---
+- name: Crear grupo en IAM .
+  iam:
+    iam_type: group
+    name: "{{iam_group}}"
+    state: present
+
+- iam_group:
+    name: "{{iam_group}}"
+    managed_policy:
+      - arn:aws:iam::aws:policy/"{{iam_policy}}"
+      - arn:aws:iam::aws:policy/AmazonEC2ReadOnlyAccess
+    state: present

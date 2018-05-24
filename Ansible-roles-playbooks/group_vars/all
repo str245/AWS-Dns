@@ -1,0 +1,11 @@
+---
+# Variables
+
+aws_access_key: 
+aws_secret_key: 
+iam_user_name: dns
+iam_password: 
+iam_group: dns
+iam_policy: autodns
+vpcid: 
+vpcregion: 

@@ -1,0 +1,35 @@
+---
+- name: Route53 Zona privada
+  route53_zone:
+    vpc_id: "{{vpcid}}"
+    zone: 'dune.lab'
+    comment: 'STR245 Dominio interno'
+    vpc_region: "{{vpcregion}}"
+    state: present
+  register: zone_out
+
+- debug:
+    var: zone_out
+
+- name: Componiendo Zona
+  lineinfile:
+    create: yes
+    dest: /AWS/Daz/cert/seguridad/DNS/config/config
+    line: ZONE="{{ zone_out.zone_id }}"
+    state: present
+
+- debug:
+    var: "{{ iam_user.results[0].user_meta.access_keys[0].access_key_id }}"
+- debug:
+    var: "{{ iam_user.results[0].user_meta.access_keys[0].secret_access_key }}"
+
+- name: Copy Configuration File
+  template: src=config/iam_policy.json.j2 dest=config/iam_policy.json mode=0644 force=yes
+
+- name: Asignar politica al grupo
+  iam_policy:
+    iam_type: group
+    iam_name: "{{iam_group}}"
+    policy_name: "{{iam_policy}}"
+    state: present
+    policy_document: config/iam_policy.json

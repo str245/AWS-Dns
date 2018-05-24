@@ -1,0 +1,28 @@
+---
+- name: Crear usuario con la API de AWS AIM.
+  iam:
+    iam_type: user
+    name: "{{item}}"
+    state: present
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
+    password: "{{iam_password}}"
+    access_key_state: create
+    groups: "{{iam_group}}"
+  with_items:
+    - "{{iam_user_name}}"
+  register: iam_user
+
+- name: Componiendo Usuario
+  lineinfile:
+    create: yes
+    dest: /AWS/Daz/cert/seguridad/DNS/config/config
+    line: AWS_ACCESS_KEY_ID="{{ iam_user.results[0].user_meta.access_keys[0].access_key_id }}"
+    state: present
+
+- name: Componiendo Token
+  lineinfile:
+    create: yes
+    dest: /AWS/Daz/cert/seguridad/DNS/config/config
+    line: AWS_SECRET_ACCESS_KEY="{{ iam_user.results[0].user_meta.access_keys[0].secret_access_key }}"
+    state: present
